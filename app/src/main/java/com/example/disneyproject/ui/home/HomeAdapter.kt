@@ -8,8 +8,9 @@ import com.bumptech.glide.Glide
 import com.example.disneyproject.R
 import com.example.disneyproject.databinding.HomeItemViewBinding
 import com.example.disneyproject.models.Result
+import com.example.disneyproject.utils.CellClickListener
 
-class HomeAdapter(private val results: ArrayList<Result>) :
+class HomeAdapter(private val results: ArrayList<Result>,private val cellClickListener: CellClickListener) :
     RecyclerView.Adapter<HomeAdapter.HomeViewHolder>() {
     lateinit var  binding : HomeItemViewBinding
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeViewHolder {
@@ -27,7 +28,11 @@ class HomeAdapter(private val results: ArrayList<Result>) :
             Glide.with(binding.comicImg.context)
                 .load(image)
                 .into(binding.comicImg)
+            holder.itemView.setOnClickListener {
+                cellClickListener.onCellClickListener(results[position])
+            }
         }
+
     }
 
     override fun getItemCount() = results.size

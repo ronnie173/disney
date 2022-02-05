@@ -1,28 +1,31 @@
 package com.example.disneyproject.ui.home
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.INVISIBLE
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.disneyproject.R
 import com.example.disneyproject.databinding.HomeLayoutBinding
 import com.example.disneyproject.models.Result
+import com.example.disneyproject.utils.CellClickListener
 import com.example.disneyproject.utils.Status
-import com.google.android.material.progressindicator.CircularProgressIndicator
 import timber.log.Timber
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), CellClickListener {
 
     private var _binding: HomeLayoutBinding? = null
     val viewModel: HomeViewModel by hiltNavGraphViewModels(R.id.nav_graph)
     private lateinit var adapter: HomeAdapter
     private var results = arrayListOf<Result>()
+
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
@@ -53,17 +56,17 @@ class HomeFragment : Fragment() {
 
     private fun setUpUi(results: ArrayList<Result>) {
         binding.homeRecyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = HomeAdapter(results)
+        adapter = HomeAdapter(results, this)
         binding.homeRecyclerView.adapter = adapter
-
     }
 
     private fun setupObservers() {
         viewModel.getUsers().observe(viewLifecycleOwner) { data ->
+            results.clear()
             data?.let { resource ->
                 when (resource.status) {
                     Status.SUCCESS -> {
-                      //  binding.circularProgressIndicator.set
+                        binding.circularProgressIndicator.visibility = INVISIBLE
                         resource.data!!.data.results.forEach { result ->
                             results.add(result)
                         }
@@ -75,10 +78,15 @@ class HomeFragment : Fragment() {
                     }
                     Status.LOADING -> {
                         Timber.d("")
-                         binding.circularProgressIndicator.show()
+                        binding.circularProgressIndicator.show()
                     }
                 }
             }
         }
+    }
+
+    override fun onCellClickListener(result: Result) {
+        Timber.d("")
+        findNavController().navigate(R.id.action_home_to_detail)
     }
 }

@@ -1,10 +1,8 @@
-package com.disney.codingproject.di
+package com.example.disneyproject.di
 
-import com.example.disneyproject.models.Result
 import com.example.disneyproject.ui.home.HomeRepository
 import com.example.disneyproject.utils.Constants
 import com.example.disneyproject.network.ComicsApi
-import com.example.disneyproject.ui.home.HomeAdapter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
