@@ -4,6 +4,8 @@ plugins {
     id 'kotlin-kapt'
     id("dagger.hilt.android.plugin")
     id 'androidx.navigation.safeargs.kotlin'
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+
 }
 
 android {
@@ -18,7 +20,13 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+    secrets {
+        // Change the properties file from the default "local.properties" in your root project
+        // to another properties file in your root project.
+        propertiesFileName 'secrets.properties'
 
+
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -107,4 +115,6 @@ dependencies {
     // dependency to appear on your APK"s compile classpath or the test APK
     // classpath.
     androidTestImplementation( "androidx.test.espresso:espresso-idling-resource:$espressoVersion")
+
+
 }
