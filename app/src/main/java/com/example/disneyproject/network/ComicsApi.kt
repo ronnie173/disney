@@ -10,6 +10,9 @@ import javax.inject.Singleton
 interface ComicsApi {
     @GET("v1/public/comics")
     suspend fun getAllComics(
+        @Query("startYear") startYear: Int,
+        @Query("hasDigitalIssue") hasDigitalIssue: Boolean,
+        @Query("limit") limit: Int,
         @Query("ts") ts: Long,
         @Query("apikey") apiKey: String,
         @Query("hash") hash: String

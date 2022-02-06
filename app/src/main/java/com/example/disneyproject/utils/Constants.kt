@@ -1,6 +1,9 @@
 package com.example.disneyproject.utils
 
+/**
+ * Constants
+ *
+ */
 object Constants {
-    //https://raw.githubuserconttent.com/itmmckernan/triviaJSON/master/.json
     const val BASE_URL = "https://gateway.marvel.com/"
 }

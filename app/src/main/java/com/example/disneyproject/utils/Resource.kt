@@ -1,5 +1,13 @@
 package com.example.disneyproject.utils
 
+/**
+ * Resource generic class to handle states
+ *
+ * @param T
+ * @property status
+ * @property data
+ * @property message
+ */
 data class Resource<out T>(val status: Status, val data: T?, val message: String?) {
     companion object {
         fun <T> success(data: T): Resource<T> = Resource(status = Status.SUCCESS, data = data, message = null)

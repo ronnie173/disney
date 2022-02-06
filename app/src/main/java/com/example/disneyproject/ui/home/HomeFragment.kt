@@ -11,8 +11,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.disneyproject.R
 import com.example.disneyproject.databinding.HomeLayoutBinding
+import com.example.disneyproject.models.ComicsModel
 import com.example.disneyproject.models.Result
+import com.example.disneyproject.ui.homedetail.HomeDetailFragmentDirections
 import com.example.disneyproject.utils.CellClickListener
+import com.example.disneyproject.utils.Resource
 import com.example.disneyproject.utils.Status
 import timber.log.Timber
 
@@ -22,7 +25,7 @@ import timber.log.Timber
 class HomeFragment : Fragment(), CellClickListener {
 
     private var _binding: HomeLayoutBinding? = null
-    val viewModel: HomeViewModel by hiltNavGraphViewModels(R.id.nav_graph)
+    private val viewModel: HomeViewModel by hiltNavGraphViewModels(R.id.nav_graph)
     private lateinit var adapter: HomeAdapter
     private var results = arrayListOf<Result>()
 
@@ -30,6 +33,14 @@ class HomeFragment : Fragment(), CellClickListener {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    /**
+     * On create view
+     *
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -41,12 +52,49 @@ class HomeFragment : Fragment(), CellClickListener {
 
     }
 
+    /**
+     * On view created
+     *
+     * @param view
+     * @param savedInstanceState
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupObservers()
-//        binding.buttonFirst.setOnClickListener {
-//            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
-//        }
+        setUpUi()
+        viewModel.getUsers().observe(viewLifecycleOwner) { data ->
+            handleData(data)
+        }
+
+    }
+
+    /**
+     * Handle data
+     *
+     * @param data
+     */
+    private fun handleData(data: Resource<ComicsModel>) {
+        results.clear()
+        data.let { resource ->
+            when (resource.status) {
+                Status.SUCCESS -> {
+                    binding.circularProgressIndicator.visibility = INVISIBLE
+                    resource.data!!.data.results.forEach { result ->
+                        results.add(result)
+                    }
+                    results.sortBy { it.id }
+                    adapter.addResults(results)
+                    adapter.notifyDataSetChanged()
+                }
+                Status.ERROR -> {
+                    Timber.d("")
+
+                }
+                Status.LOADING -> {
+                    Timber.d("")
+                    binding.circularProgressIndicator.show()
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -54,39 +102,27 @@ class HomeFragment : Fragment(), CellClickListener {
         _binding = null
     }
 
-    private fun setUpUi(results: ArrayList<Result>) {
+    /**
+     * Set up ui
+     *
+     */
+    private fun setUpUi() {
         binding.homeRecyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = HomeAdapter(results, this)
+        adapter = HomeAdapter( this)
         binding.homeRecyclerView.adapter = adapter
     }
 
-    private fun setupObservers() {
-        viewModel.getUsers().observe(viewLifecycleOwner) { data ->
-            results.clear()
-            data?.let { resource ->
-                when (resource.status) {
-                    Status.SUCCESS -> {
-                        binding.circularProgressIndicator.visibility = INVISIBLE
-                        resource.data!!.data.results.forEach { result ->
-                            results.add(result)
-                        }
-                        setUpUi(results)
-                    }
-                    Status.ERROR -> {
-                        Timber.d("")
-
-                    }
-                    Status.LOADING -> {
-                        Timber.d("")
-                        binding.circularProgressIndicator.show()
-                    }
-                }
-            }
-        }
-    }
-
+    /**
+     * On cell click listener
+     *
+     * @param result
+     */
     override fun onCellClickListener(result: Result) {
-        Timber.d("")
-        findNavController().navigate(R.id.action_home_to_detail)
+        val imageUrl = "${result.thumbnail.path}.${result.thumbnail.extension}"
+        val description = result.description
+        val title = result.title
+        val readMoreUri = result.urls.first().url
+        val action = HomeFragmentDirections.actionHomeToDetail(imageUrl,description,title,readMoreUri)
+        findNavController().navigate(action)
     }
 }
